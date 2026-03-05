@@ -6,8 +6,47 @@ const fs = require("fs");
 // endTime: (typeof string) formatted as hh:mm:ss am or hh:mm:ss pm
 // Returns: string formatted as h:mm:ss
 // ============================================================
+function convert12HourToSeconds(timeStr) {
+    timeStr = timeStr.trim(); 
+
+    let [time, ampm] = timeStr.split(" ");
+    let [hours, minutes, seconds] = time.split(":").map(Number);
+
+    if (ampm.toLowerCase() === "pm" && hours !== 12) {
+        hours += 12;
+    }
+
+    if (ampm.toLowerCase() === "am" && hours === 12) {
+        hours = 0;
+    }
+
+    return hours * 3600 + minutes * 60 + seconds;
+}
+
+function secondsToHMS(totalSeconds) {
+    let hours = Math.floor(totalSeconds / 3600);
+    let remaining = totalSeconds % 3600;
+
+    let minutes = Math.floor(remaining / 60);
+    let seconds = remaining % 60;
+
+    minutes = String(minutes).padStart(2, "0");
+    seconds = String(seconds).padStart(2, "0");
+
+    return `${hours}:${minutes}:${seconds}`;
+}
+
 function getShiftDuration(startTime, endTime) {
-    // TODO: Implement this function
+    let startSec = convert12HourToSeconds(startTime);
+    let endSec = convert12HourToSeconds(endTime);
+
+    // Handle overnight shifts
+    if (endSec < startSec) {
+        endSec += 24 * 3600; // add 24 hours in seconds
+    }
+
+    const shift = endSec - startSec;
+    return secondsToHMS(shift);
 }
 
 // ============================================================
@@ -17,8 +56,38 @@ function getShiftDuration(startTime, endTime) {
 // Returns: string formatted as h:mm:ss
 // ============================================================
 function getIdleTime(startTime, endTime) {
-    // TODO: Implement this function
+    let start = convert12HourToSeconds(startTime);
+    let end = convert12HourToSeconds(endTime);
+
+    if (end < start) {
+        end += 24 * 3600; // add 24 hours in seconds
+    }
+
+    const startLimit = convert12HourToSeconds("8:00:00 am");
+    const endLimit = convert12HourToSeconds("10:00:00 pm");
+
+    let idleSeconds = 0;
+
+    if (end <= startLimit) {
+        idleSeconds = end - start;
+    }
+    
+    else if (start >= endLimit) {
+        idleSeconds = end - start;
+    } else {
+        
+        if (start < startLimit) {
+            idleSeconds += startLimit - start;
+        }
+        
+        if (end > endLimit) {
+            idleSeconds += end - endLimit;
+        }
+    }
+
+    return secondsToHMS(idleSeconds);
 }
+
 
 // ============================================================
 // Function 3: getActiveTime(shiftDuration, idleTime)
