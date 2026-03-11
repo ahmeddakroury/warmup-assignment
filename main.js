@@ -111,12 +111,7 @@ function getActiveTime(shiftDuration, idleTime) {
     
     return secondsToHMS(activeTime);
 }
-console.log(getActiveTime("10:12:20","1:58:40")) // 8:13:40
-console.log(getActiveTime("5:00:00","1:00:00"))  // 4:00:00
-console.log(getActiveTime("3:30:00","0:30:00"))  // 3:00:00
-console.log(getActiveTime("2:00:00","2:00:00"))  // 0:00:00
-console.log(getActiveTime("1:00:00","0:59:59")) // 0:00:01
-console.log(getActiveTime("0:30:00","0:10:00")) // 0:20:00
+
 // ============================================================
 // Function 4: metQuota(date, activeTime)
 // date: (typeof string) formatted as yyyy-mm-dd
@@ -124,9 +119,26 @@ console.log(getActiveTime("0:30:00","0:10:00")) // 0:20:00
 // Returns: boolean
 // ============================================================
 function metQuota(date, activeTime) {
-    // TODO: Implement this function
-}
 
+    let [yr, month, day] = date.split("-").map(Number);
+
+    let quota = HMSToSeconds("8:24:00");
+    let specialQuota = HMSToSeconds("6:00:00");
+
+    let actTime = HMSToSeconds(activeTime);
+
+    if (yr == 2025 && month == 4 && day >= 10 && day <= 30) {
+        return actTime >= specialQuota;
+    } else {
+        return actTime >= quota;
+    }
+
+}
+console.log(metQuota("2025-04-15","6:50:00")) // true
+console.log(metQuota("2025-04-05","7:42:59")) // false
+console.log(metQuota("2025-04-05","9:00:00")) // true
+console.log(metQuota("2025-04-10","6:00:00")) // true
+console.log(metQuota("2025-04-09","6:00:00")) // false
 // ============================================================
 // Function 5: addShiftRecord(textFile, shiftObj)
 // textFile: (typeof string) path to shifts text file
