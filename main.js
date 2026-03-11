@@ -89,6 +89,13 @@ function getIdleTime(startTime, endTime) {
 }
 
 
+function HMSToSeconds(timeStr) {
+
+    let [hours, minutes, seconds] = timeStr.split(":").map(Number);
+
+    return hours * 3600 + minutes * 60 + seconds;
+}
+
 // ============================================================
 // Function 3: getActiveTime(shiftDuration, idleTime)
 // shiftDuration: (typeof string) formatted as h:mm:ss
@@ -96,9 +103,20 @@ function getIdleTime(startTime, endTime) {
 // Returns: string formatted as h:mm:ss
 // ============================================================
 function getActiveTime(shiftDuration, idleTime) {
-    // TODO: Implement this function
-}
+    
+    let sd = HMSToSeconds(shiftDuration);
+    let it = HMSToSeconds(idleTime);
 
+    let activeTime = sd - it;
+    
+    return secondsToHMS(activeTime);
+}
+console.log(getActiveTime("10:12:20","1:58:40")) // 8:13:40
+console.log(getActiveTime("5:00:00","1:00:00"))  // 4:00:00
+console.log(getActiveTime("3:30:00","0:30:00"))  // 3:00:00
+console.log(getActiveTime("2:00:00","2:00:00"))  // 0:00:00
+console.log(getActiveTime("1:00:00","0:59:59")) // 0:00:01
+console.log(getActiveTime("0:30:00","0:10:00")) // 0:20:00
 // ============================================================
 // Function 4: metQuota(date, activeTime)
 // date: (typeof string) formatted as yyyy-mm-dd
